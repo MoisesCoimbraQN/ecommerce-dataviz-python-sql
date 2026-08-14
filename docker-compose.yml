@@ -1,14 +1,18 @@
+version: '3.8'
+
 services:
   mysql-olist:
     image: mysql:8.0
     container_name: mysql_olist_container
     restart: always
+    env_file:
+      - .env
     environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: db_olist
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
       TZ: "America/Sao_Paulo"
     ports:
-      - "3306:3306"
+      - "${DB_PORT}:3306"
     volumes:
       - olist_mysql_data:/var/lib/mysql
 
