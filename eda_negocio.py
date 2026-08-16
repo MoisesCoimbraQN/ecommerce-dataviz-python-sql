@@ -129,7 +129,7 @@ print("=== 7. PERFORMANCE LOGISTICA E PRAZOS DE ENTREGA ===")
 print(pd.read_sql(q_logistica, con=engine).to_string(index=False))
 
 
-# 8. Analise Geografica por Estado (Top 10 UFs)
+# 8. Analise Geografica por Estado
 q_geografia = """
 SELECT 
     c.customer_state AS uf,
@@ -151,7 +151,7 @@ print("=== 8. TOP 10 ESTADOS (VOLUME, FRETE E ATRASO) ===")
 print(pd.read_sql(q_geografia, con=engine).to_string(index=False))
 print("\n")
 
-# 9. Recorrencia de Compras por Cliente (customer_unique_id)
+# 9. Recorrencia de Compras por Cliente 
 q_recorrencia = """
 WITH compras_cliente AS (
     SELECT 
@@ -193,3 +193,5 @@ GROUP BY status_entrega;
 
 print("=== 10. NOTA MEDIA DE AVALIACAO: NO PRAZO VS ATRASADO ===")
 print(pd.read_sql(q_reviews_atraso, con=engine).to_string(index=False))
+
+#adicionar outras consultas que faltarem para os demais... 
