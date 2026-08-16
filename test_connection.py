@@ -7,7 +7,7 @@ load_dotenv()
 
 USER = os.getenv("DB_USER")
 PASSWORD = os.getenv("DB_PASSWORD")
-HOST = "127.0.0.1"  # força IPv4, evita o problema de localhost -> ::1
+HOST = "127.0.0.1" 
 PORT = os.getenv("DB_PORT")
 DATABASE = os.getenv("DB_NAME")
 
@@ -17,8 +17,8 @@ engine = create_engine(connection_url)
 try:
     query = "SHOW TABLES;"
     df_tables = pd.read_sql(query, con=engine)
-    print("✅ Conexão bem-sucedida ao MySQL no Docker!")
+    print(" Conexão bem-sucedida ao MySQL no Docker!")
     print("\nTabelas encontradas no banco 'db_olist':")
     print(df_tables)
 except Exception as e:
-    print(f"❌ Erro ao conectar no MySQL: {e}")
+    print(f" Erro ao conectar no MySQL: {e}")
