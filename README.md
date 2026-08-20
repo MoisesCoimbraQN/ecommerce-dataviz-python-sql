@@ -1,8 +1,6 @@
 # Brazilian E-Commerce Data Analysis & Insights
 
-Este repositório contém um projeto ponta a ponta de Análise e Engenharia de Dados aplicado a um ecossistema de E-Commerce no Brasil. O projeto abrange desde o provisionamento do banco de dados relacional em ambiente containerizado até a execução de consultas SQL e a criação de painéis analíticos interativos.
-
----
+Este repositório contém um projeto ponta a ponta de Análise, Engenharia de Dados e Business Intelligence aplicado a um ecossistema de E-Commerce no Brasil. O projeto abrange desde o provisionamento de banco de dados relacional em ambiente containerizado e consultas SQL até o desenvolvimento de um pipeline de ETL em Python, criação de Data Marts analíticos, modelagem de segmentação de clientes (RFM) e construção de painéis de visualização.
 
 ## Fonte dos Dados
 
@@ -10,79 +8,66 @@ Este repositório contém um projeto ponta a ponta de Análise e Engenharia de D
 * Origem: Kaggle (dados reais e anonimizados do e-commerce brasileiro)
 * Período de Cobertura: Pedidos realizados entre 2016 e 2018
 
----
+## Arquitetura, Engenharia de Dados e Pipeline ETL
 
-## Arquitetura e Engenharia de Dados
+### 1. Ambiente Relacional (Docker & PostgreSQL)
+* Provisionamento de banco de dados relacional PostgreSQL em container via Docker Compose.
+* Modelagem relacional, criação de chaves (PK/FK) e gestão de esquemas via DBeaver.
+* Ingestão de microdados originais em CSV para as tabelas relacionais do banco.
 
-### 1. Ambiente e Banco de Dados (Docker & DBeaver)
-* Containerização: Provisionamento do banco de dados relacional PostgreSQL via Docker e Docker Compose.
-* Gestão do Banco: Conexão, modelagem e administração das tabelas realizadas via DBeaver.
-* Ingestão de Dados: Carga dos arquivos CSV originais para as tabelas relacionais mantendo as chaves primárias e estrangeiras (PK/FK).
+### 2. Consultas e Extração SQL
+* Agregações e Joins complexos para consolidação de dados de clientes, pedidos, itens, pagamentos e avaliações.
+* Visões (Views) e consultas otimizadas para servir de base direta para as análises em Python.
 
-### 2. Consultas e Extração via SQL
-* Agregações e Joins complexos para consolidar dados de clientes, pedidos, pagamentos e avaliações.
-* Criação de visões (Views) e consultas otimizadas para servir de base direta para as análises em Python.
+### 3. Pipeline de Tratamento, Engenharia de Features e Data Marts (Python & Parquet)
+* Pipeline de transformação e limpeza de dados utilizando Pandas e PyArrow.
+* Cálculo do SLA Logístico e Lead Time de entrega real vs. estimado por estado.
+* Construção da Matriz RFM (Recência, Frequência e Valor Monetário) para segmentação de base de clientes.
+* Geração e exportação dos Data Marts analíticos em formato Parquet para alta performance de leitura (`mart_pedidos_performance.parquet` e `mart_rfm_clientes.parquet`).
 
----
 
+### 1. Concentração Geográfica da Receita (Mapa de Densidade)
+![Mapa de Densidade de Receita](assets/images/01_mapa_densidade_receita.png)
+
+* Diagnóstico: Alta densidade de faturamento concentrada no eixo Sudeste e Sul...
+
+
+### 2. Tendência Temporal e Diversificação Regional
+![Evolução Mensal de Pedidos por Região](assets/images/02_evolucao_pedidos_regiao.png)
+
+* Diagnóstico de Risco: Alta dependência e concentração de receita na Região Sudeste...
+
+
+### 3. Segmentação de Base (Matriz RFM)
+![Distribuição dos Segmentos RFM](assets/images/03_distribuicao_rfm.png)
+
+* Diagnóstico: Apenas 6.4% da base de clientes enquadra-se no perfil Recente / Valioso...
+
+
+### 4. Monetização por Perfil de Cliente
+![Receita Acumulada por Segmento](assets/images/04_receita_segmento.png)
+
+* Diagnóstico: O grupo Cliente Ativo / Recente lidera o volume financeiro absoluto...
+
+
+### 5. Eficiência e Gargalos Logísticos (SLA)
+![Tempo Médio de Entrega por Estado](assets/images/05_lead_time_uf.png)
+
+* Diagnóstico: Disparidade expressiva no tempo de entrega entre o Norte/Nordeste...
 ## Estrutura do Projeto
 
-* docker/: Arquivos de configuração do container (docker-compose.yml e scripts de inicialização).
-* sql/: Scripts SQL para criação de esquemas, tabelas e consultas analíticas.
-* data/: Arquivos de dados e exportações processadas.
-* notebooks/: Notebooks Jupyter com o pipeline de análise exploratória em Python.
-* assets/: Arquivos .html interativos exportados para integração com dashboards e sites.
+```text
+├── assets/                           # Arquivos interativos (.html) e imagens estáticas (.png)
+├── data/                             # Data Marts processados (.parquet e .csv)
+├── DICIONARIO_DADOS.md               # Documentação e dicionário de dados
+├── docker-compose.yml                # Configuração do container PostgreSQL
+├── eda_negocio.py                    # Análise exploratória focada em regras de negócio
+├── eda_tabelas.py                    # Análise estrutural das tabelas
+├── eda_visualizacoes_insights.ipynb  # Notebook principal com gráficos e insights
+├── eda_visualizacoes.ipynb           # Notebook de rascunho de visualizações
+├── pipeline.py                       # Pipeline ETL principal
+├── README.md                         # Documentação do projeto
+├── requirements.txt                  # Dependências do projeto
+├── test_connection.py                # Script de teste de conexão com o banco
+└── upload_data.py                    # Script de carga inicial de dados no banco
 
----
-
-## Seções da Análise Exploratória (EDA)
-
-### 1. Visualizações Estáticas Executivas (Matplotlib & Seaborn)
-* Evolução Temporal: Tendência de volume e receita de pedidos ao longo do tempo.
-* Gargalo Logístico: Taxa de atraso nas entregas segmentada por Estado (UF).
-* Satisfação (CSAT): Relação entre tempo de entrega e notas de avaliação dos clientes.
-
-### 2. Painel Interativo para Exploração de Dados (Plotly)
-> Esta seção apresenta gráficos interativos em Plotly, permitindo a exploração detalhada dos dados via hover e zoom. Essa abordagem viabiliza a exportação nativa em HTML, facilitando a incorporação das visualizações em websites, dashboards e relatórios executivos.
-
-* 01. Evolução Mensal: Gráfico de linha interativo com métricas ao passar o mouse.
-* 02. Atraso por UF: Barras com gradiente térmico de criticidade de atrasos.
-* 03. CSAT vs. Atraso: Distribuição de notas (1 a 5) entre entregas no prazo e em atraso.
-* 04. Concentração Geográfica: Subplots pareados (Volume de Pedidos vs. Receita R$).
-* 05. Top Categorias por Região: Gráfico de barras empilhadas 100% com distribuição percentual.
-* 06. Formas de Pagamento: Donut chart com apontadores externos e participação das transações.
-* 07. Lead Time por UF: Tempo médio de entrega (dias) ordenado por estado.
-
----
-
-## Tecnologias Utilizadas
-
-* Infraestrutura & Banco de Dados: Docker, PostgreSQL, DBeaver, SQL
-* Linguagem: Python 3.x
-* Manipulação de Dados: Pandas, NumPy, SQLAlchemy / psycopg2
-* Visualização Estática: Matplotlib, Seaborn
-* Visualização Interativa: Plotly Express / Graph Objects
-
----
-
-## Como Executar o Projeto
-
-1. Clone o repositório:
-   git clone https://github.com/seu-usuario/Brazilian_E_Commerce.git
-   cd Brazilian_E_Commerce
-
-2. Suba o ambiente Docker do Banco de Dados:
-   docker-compose up -d
-
-3. Crie e ative o ambiente virtual Python:
-   python -m venv .venv
-   # Windows:
-   .venv\Scripts\activate
-   # Linux/Mac:
-   source .venv/bin/activate
-
-4. Instale as dependências:
-   pip install -r requirements.txt
-
-5. Execute o Jupyter Notebook:
-   jupyter notebook
