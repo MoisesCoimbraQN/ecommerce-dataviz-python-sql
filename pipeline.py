@@ -44,7 +44,7 @@ def run_pipeline():
         WHERE o.order_status = 'delivered';
     """
     
-    # Extrai coordenadas médias por prefixo de CEP (evita duplicações no JOIN)
+    # Extrai coordenadas médias por prefixo de CEP (evita duplicações no JOIN com agregação dos prefixos dos CEPs dos clientes)
     query_geo = """
         SELECT 
             geolocation_zip_code_prefix AS customer_zip_code_prefix,
@@ -62,7 +62,7 @@ def run_pipeline():
         print(f"Erro ao conectar ou extrair do MySQL: {e}")
         return
 
-    # --- 2. TRANSFORMAÇÃO & INSIGHTS (TRANSFORM) ---
+    # 2. TRANSFORMAÇÃO & INSIGHTS (TRANSFORM) 
     
     # A. Merge de dados geográficos
     df = df.merge(df_geo, on='customer_zip_code_prefix', how='left')
@@ -72,7 +72,7 @@ def run_pipeline():
     for col in date_cols:
         df[col] = pd.to_datetime(df[col])
         
-    # C. SLAs Logísticos
+    # C. SLAs Logísticos -- calculo de dias de entrega, atraso e flag de atraso
     df['dias_entrega_real'] = (df['order_delivered_customer_date'] - df['order_purchase_timestamp']).dt.total_seconds() / 86400
     df['dias_estimados'] = (df['order_estimated_delivery_date'] - df['order_purchase_timestamp']).dt.total_seconds() / 86400
     df['atraso_dias'] = df['dias_entrega_real'] - df['dias_estimados']
@@ -101,10 +101,11 @@ def run_pipeline():
     rfm['F_Score'] = pd.Series(np.where(rfm['Frequencia_Pedidos'] > 1, 2, 1))
     rfm['M_Score'] = pd.qcut(rfm['ValorTotal_R$'], 4, labels=[1, 2, 3, 4])
     
-    # Regra de Segmentação
+
+# Regra de Segmentação de Clientes
     def definir_segmento(row):
         if row['R_Score'] == 4 and row['M_Score'] == 4:
-            return 'Cliente Campeao'
+            return 'Recente / Valioso'  # Ajustado de 'Cliente Campeao'
         elif row['R_Score'] <= 2 and row['M_Score'] >= 3:
             return 'Em Risco / Churn'
         elif row['R_Score'] >= 3:
@@ -113,8 +114,6 @@ def run_pipeline():
             return 'Atencao Necessaria'
             
     rfm['Segmento_Cliente'] = rfm.apply(definir_segmento, axis=1)
-    
-    print("Transformacoes de SLA, RFM e Geolocalizacao concluidas.")
 
     # --- 3. CARGA (LOAD) ---
     path_pedidos = "data/mart_pedidos_performance.parquet"
@@ -129,3 +128,29 @@ def run_pipeline():
 
 if __name__ == "__main__":
     run_pipeline()
+
+
+# Verificando
+"""
+# 1. Carrega o Data Mart de RFM com dados de geolocalização
+df_rfm = pd.read_parquet("data/mart_rfm_clientes.parquet")
+
+# 2. Exibe as primeiras linhas da base
+print("--- Primeiras Linhas do Data Mart ---")
+print(df_rfm.head())
+
+# 3. Contagem absoluta e percentual por segmento de cliente
+print("\n--- Distribuição dos Segmentos de Clientes ---")
+contagem = df_rfm['Segmento_Cliente'].value_counts()
+percentual = df_rfm['Segmento_Cliente'].value_counts(normalize=True) * 100
+
+df_resumo = pd.DataFrame({
+    'Total_Clientes': contagem,
+    'Percentual_%': percentual.round(2)
+})
+print(df_resumo)
+
+# 4. Filtro para o segmento Recente / Valioso
+recentes_valiosos = df_rfm[df_rfm['Segmento_Cliente'] == 'Recente / Valioso']
+print(f"\nTotal de Clientes Recentes / Valiosos: {len(recentes_valiosos):,}")
+"""
