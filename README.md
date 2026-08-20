@@ -1,6 +1,6 @@
 # Brazilian E-Commerce Data Analysis & Insights
 
-Este repositório contém uma Análise Exploratória de Dados (EDA) aplicada a um ecossistema de E-Commerce no Brasil. O objetivo do projeto é mapear o comportamento de compras, identificar gargalos logísticos, avaliar a satisfação do cliente (CSAT) e analisar a performance por categoria e região.
+Este repositório contém um projeto ponta a ponta de Análise e Engenharia de Dados aplicado a um ecossistema de E-Commerce no Brasil. O projeto abrange desde o provisionamento do banco de dados relacional em ambiente containerizado até a execução de consultas SQL e a criação de painéis analíticos interativos.
 
 ---
 
@@ -8,14 +8,29 @@ Este repositório contém uma Análise Exploratória de Dados (EDA) aplicada a u
 
 * Dataset: Brazilian E-Commerce Public Dataset by Olist
 * Origem: Kaggle (dados reais e anonimizados do e-commerce brasileiro)
-* Período de Extração/Cobertura dos Dados: Pedidos realizados entre 2016 e 2018
+* Período de Cobertura: Pedidos realizados entre 2016 e 2018
+
+---
+
+## Arquitetura e Engenharia de Dados
+
+### 1. Ambiente e Banco de Dados (Docker & DBeaver)
+* Containerização: Provisionamento do banco de dados relacional PostgreSQL via Docker e Docker Compose.
+* Gestão do Banco: Conexão, modelagem e administração das tabelas realizadas via DBeaver.
+* Ingestão de Dados: Carga dos arquivos CSV originais para as tabelas relacionais mantendo as chaves primárias e estrangeiras (PK/FK).
+
+### 2. Consultas e Extração via SQL
+* Agregações e Joins complexos para consolidar dados de clientes, pedidos, pagamentos e avaliações.
+* Criação de visões (Views) e consultas otimizadas para servir de base direta para as análises em Python.
 
 ---
 
 ## Estrutura do Projeto
 
-* data/: Conjunto de dados estruturados e processados.
-* notebooks/: Notebooks Jupyter contendo o pipeline de análise exploratória.
+* docker/: Arquivos de configuração do container (docker-compose.yml e scripts de inicialização).
+* sql/: Scripts SQL para criação de esquemas, tabelas e consultas analíticas.
+* data/: Arquivos de dados e exportações processadas.
+* notebooks/: Notebooks Jupyter com o pipeline de análise exploratória em Python.
 * assets/: Arquivos .html interativos exportados para integração com dashboards e sites.
 
 ---
@@ -42,8 +57,9 @@ Este repositório contém uma Análise Exploratória de Dados (EDA) aplicada a u
 
 ## Tecnologias Utilizadas
 
+* Infraestrutura & Banco de Dados: Docker, PostgreSQL, DBeaver, SQL
 * Linguagem: Python 3.x
-* Manipulação de Dados: Pandas, NumPy
+* Manipulação de Dados: Pandas, NumPy, SQLAlchemy / psycopg2
 * Visualização Estática: Matplotlib, Seaborn
 * Visualização Interativa: Plotly Express / Graph Objects
 
@@ -55,15 +71,18 @@ Este repositório contém uma Análise Exploratória de Dados (EDA) aplicada a u
    git clone https://github.com/seu-usuario/Brazilian_E_Commerce.git
    cd Brazilian_E_Commerce
 
-2. Crie e ative o ambiente virtual:
+2. Suba o ambiente Docker do Banco de Dados:
+   docker-compose up -d
+
+3. Crie e ative o ambiente virtual Python:
    python -m venv .venv
    # Windows:
    .venv\Scripts\activate
    # Linux/Mac:
    source .venv/bin/activate
 
-3. Instale as dependências:
+4. Instale as dependências:
    pip install -r requirements.txt
 
-4. Execute o Jupyter Notebook:
+5. Execute o Jupyter Notebook:
    jupyter notebook
